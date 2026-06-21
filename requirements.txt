@@ -1,0 +1,6 @@
+# 01_fastapi_basic
+fastapi
+uvicorn
+# 02_fastapi_upload_csv
+pandas
+python-multipart
