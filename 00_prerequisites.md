@@ -21,6 +21,7 @@ Common uv commands
 - Add a dependency: `uv add <package_name>`
 - Run a script: `uv run script.py`
 - Manage Python versions: `uv python install 3.13`
+- Install from requirements.txt: `uv add -r .\requirements.txt`
 
 ## Create Virtual Environment
 

@@ -4,3 +4,6 @@ uvicorn
 # 02_fastapi_upload_csv
 pandas
 python-multipart
+# 03_simple_gemini_chat
+langchain-google-genai
+python-dotenv
