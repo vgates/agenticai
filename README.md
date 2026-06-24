@@ -17,6 +17,7 @@ Here is the structured sequence of learnings, with direct links to the source fi
 | **02** | **File Uploads & Data Parsing** | [02_fastapi_upload_csv.py](02_fastapi_upload_csv.py) | Handling multipart file uploads using `UploadFile` and `File` in FastAPI, streaming files without loading into RAM, and reading files into Pandas DataFrames. |
 | **03** | **LLM Chat Integration** | [03_simple_gemini_chat.py](03_simple_gemini_chat.py) | Connecting to Google's Gemini models using `langchain-google-genai` and `ChatGoogleGenerativeAI`, configuring API keys, loading environments, and model invocation. |
 | **04** | **Screener Web Scraper** | [04_scrape_screener.py](04_scrape_screener.py) | Authenticating programmatically with CSRF-protected forms, persistent sessions, handling anti-scraping User-Agent headers, BeautifulSoup parsing, and exporting to CSV. |
+| **05** | **LangChain Tool Calling** | [05_langchain_invoke_tool.py](05_langchain_invoke_tool.py) | Creating AI agents using LangChain tools, binding tools to Gemini models (`bind_tools`), manual execution loop, and fallback logic using the free OpenWeatherMap 2.5 API. |
 | **Helper** | **Main Entry Point Idiom** | [main.py](main.py) | Understanding the standard Python entry point check `if __name__ == "__main__":` for standalone execution vs. module imports. |
 
 ---
@@ -59,6 +60,33 @@ graph TD
     J --> K[Construct DataFrame & Export CSV]
 ```
 
+### 5. LangChain Tool Calling & Agentic AI
+In [05_langchain_invoke_tool.py](05_langchain_invoke_tool.py), we advance to Agentic AI by building an LLM program that interacts with external APIs:
+* **Tools in LangChain**: Wrapped using the `@tool` decorator, where function signatures and docstrings act as metadata for the LLM.
+* **LLM Tool Binding**: Using `llm.bind_tools(...)` to attach schemas to the Gemini model.
+* **Agent Execution Loop**: Manually orchestrating the loop (Prompt $\rightarrow$ Tool Call Request $\rightarrow$ Tool Execution $\rightarrow$ Tool Output $\rightarrow$ Final Response) to demystify how agents work under the hood.
+* **API Fallback Resilience**: Querying OpenWeatherMap's free 2.5 API (which doesn't require a paid subscription/card setup) with a fallback to mock weather data if the key is missing or invalid.
+
+```mermaid
+sequenceDiagram
+    participant User as User
+    participant App as Application / Runtime
+    participant LLM as Gemini Model
+    participant Tool as Weather Tool (API / Mock)
+    
+    User->>App: "What is the weather in Tokyo?"
+    App->>LLM: Send Conversation History
+    Note over LLM: LLM reviews query & decides<br/>it needs weather data
+    LLM-->>App: Return Tool Call Request (get_weather, location="Tokyo")
+    App->>Tool: Execute get_weather("Tokyo")
+    Note over Tool: Hit OpenWeatherMap API<br/>(or fallback to Mock)
+    Tool-->>App: Return "19.8°C, Few clouds"
+    App->>LLM: Send Tool Output (ToolMessage)
+    Note over LLM: LLM reviews tool data &<br/>synthesizes natural answer
+    LLM-->>App: Return Final AI Response
+    App->>User: "Tokyo is currently 19.8°C with few clouds..."
+```
+
 ---
 
 ## 🚀 Running Guide
@@ -78,6 +106,9 @@ GOOGLE_API_KEY=your_gemini_api_key_here
 SCREENER_USERNAME=your_screener_username_here
 SCREENER_PASSWORD=your_screener_password_here
 SCREENER_SCREEN_URL=https://www.screener.in/screens/3626789/top-30-momentum-stocks/
+# Optional: Get a free key from https://openweathermap.org/
+# If omitted, the tool falls back to highly realistic mock data automatically
+OPENWEATHERMAP_API_KEY=your_openweathermap_api_key_here
 ```
 
 ### Run Examples
@@ -96,6 +127,10 @@ SCREENER_SCREEN_URL=https://www.screener.in/screens/3626789/top-30-momentum-stoc
 - **Screener Scraper**:
   ```bash
   uv run python 04_scrape_screener.py
+  ```
+- **LangChain Tool Invocation (Agent)**:
+  ```bash
+  uv run python 05_langchain_invoke_tool.py
   ```
 
 ---
