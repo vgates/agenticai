@@ -7,3 +7,6 @@ python-multipart
 # 03_simple_gemini_chat
 langchain-google-genai
 python-dotenv
+# 04_momentum_tracker
+openpyxl
+yfinance
